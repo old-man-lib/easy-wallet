@@ -1,0 +1,35 @@
+{
+	"ethereum" : {
+		"main_coin" : "ETH",
+		"chain_id" : 1,
+		"main_coin_img" : "./images/eth.png",
+		"rpc_url" : "https://eth.llamarpc.com",
+		"coins" : [
+			{
+				"token" : "USDT",
+				"token_img" : "./images/usdt.png",
+				"token_contract" : "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+			}
+		]
+	},
+	"binance" : {
+		"main_coin" : "BNB",
+		"chain_id" : 56,
+		"main_coin_img" : "./images/bnb.png",
+		"rpc_url" : "https://bsc-dataseed.binance.org/",
+		"coins" : []
+	},
+	"polygon" : {
+		"main_coin" : "MATIC",
+		"chain_id" : 137,
+		"main_coin_img" : "./images/matic.png",
+		"rpc_url" : "https://polygon.llamarpc.com",
+		"coins" : [
+			{
+				"token" : "USDT",
+				"token_img" : "./images/usdt.png",
+				"token_contract" : "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"
+			}
+		]
+	}
+}

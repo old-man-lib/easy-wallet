@@ -1,0 +1,18 @@
+{
+	"russian" : {
+		"lang_text" : "Русский 🇷🇺",
+		"morning_text" : "доброе утро",
+		"day_text" : "добрый день",
+		"evening_text" : "добрый вечер",
+		"night_text" : "доброй ночи",
+		"start_message" : "<b>{start_time_message}</b>, тут вы можете обменивать, хранить, получить и отправить криптовалюту.\nПрисоединяйтесь к нашему каналу, чтобы быть всегда в курсе новостей на рынке и обновлений бота.\nОткрыто главное меню."
+	},
+	"english" : {
+		"lang_text" : "English 🇺🇸",
+		"morning_text" : "good morning",
+		"day_text" : "good afternoon",
+		"evening_text" : "good evening",
+		"night_text" : "good night",
+		"start_message" : "<b>{start_time_message}</b>, here you can exchange, store, receive and send cryptocurrency.\nJoin our channel to be always up to date with market news and bot updates.\nThe main menu is opened."
+	}
+}
