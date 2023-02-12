@@ -159,9 +159,15 @@ def GetAllBalances(user_id):
 
 	return balances
 
-# --------------------- Work With Crypto --------------------- # Rewrite All Function <- !!!
-def GetNetworkCoinPrice(network) -> float:
-	url = 'https://api.coincap.io/v2/assets/'+network
+# --------------------- Work With Crypto --------------------- #
+json_file = './data/coins_api_name.json'
+with open(json_file, "r", encoding='utf-8') as file:
+	coins_api_name = orjson.loads(file.read())
+
+def GetNetworkCoinPrice(coin_name) -> float:
+	api_name = coins_api_name[coin_name]
+
+	url = 'https://api.coincap.io/v2/assets/'+api_name
 	result = requests.request('GET', url).json()
 
 	return float(result['data']['priceUsd'])
@@ -171,6 +177,14 @@ def GetUSDPrice() -> float:
 	result = requests.request('GET', url).json()
 
 	return float(result['Valute']['USD']['Value'])
+
+def CurrecnyEmoji(currency='USD'):
+	currency_emojis = {
+		"USD" : "$",
+		"RUB" : "₽"
+	}
+
+	return currency_emojis[currency]
 
 # -------------------- Language List -------------------- #
 json_file = './data/language.json'
@@ -216,21 +230,18 @@ def DayTimeText() -> str:
 def on_startup() -> None:
 	print("Bot Started!")
 
-def shutdown_bot() -> None:
-	print("Bot Stopped, bye bye!")
-
 def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 	user_info = GetUserInfo(user_id)
 	user_balances = GetAllBalances(user_id)
 
 	header = profile_text['header']
 	header = header.replace('{telegram_id}', str(user_info['tg_id']))
-	header = header.replace('{balance_in_currency}', 'error')
-	header = header.replace('{currency}', '')
 	header = header.replace('{count_of_trnsactions}', 'error')
 	header = header.replace('{registration_data}', str(user_info['reg_datetime']))
 		
 	answer = header
+
+	usd_balance = 0
 
 	answer += f"┌ {profile_text['wallet'].capitalize()}\n"
 	for x, network_balances in enumerate(user_balances):
@@ -243,6 +254,8 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 			answer += f"ㅤ├ {profile_text['cryptocurrency'].capitalize()}\n"
 			answer += f"ㅤ│ └ {main_coin} - {profile_text['balance'].capitalize()}: {network_balances[network]}\n"
 			answer += f"ㅤ└ {profile_text['token'].capitalize()}\n"
+
+			usd_balance += GetNetworkCoinPrice(main_coin)*network_balances[network]
 			
 			if len(network_balances['tokens_balances']) == 0:
 				answer += f"ㅤㅤ └ {profile_text['none'].capitalize()}\n"
@@ -250,9 +263,11 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 				tokens_balances = network_balances['tokens_balances']
 				for y, token_name in enumerate(tokens_balances):
 					if y+1 == len(network_balances['tokens_balances']):
-						answer += f"ㅤㅤ└ {token_name} - {profile_text['balance']}: {tokens_balances[token_name]}\n"
+						answer += f"ㅤㅤ└ {token_name} - {profile_text['balance'].capitalize()}: {tokens_balances[token_name]}\n"
 					else:
-						answer += f"ㅤㅤ├ {token_name} - {profile_text['balance']}: {tokens_balances[token_name]}\n"
+						answer += f"ㅤㅤ├ {token_name} - {profile_text['balance'].capitalize()}: {tokens_balances[token_name]}\n"
+
+					usd_balance += GetNetworkCoinPrice(token_name)*tokens_balances[token_name]
 		
 		else:
 			network = list(network_balances.keys())[0]
@@ -263,6 +278,8 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 			answer += f"│ ├ {profile_text['cryptocurrency'].capitalize()}\n"
 			answer += f"│ │ └ {main_coin} - {profile_text['balance'].capitalize()}: {network_balances[network]}\n"
 			answer += f"│ └ {profile_text['token'].capitalize()}\n"
+
+			usd_balance += GetNetworkCoinPrice(main_coin)*network_balances[network]
 			
 			if len(network_balances['tokens_balances']) == 0:
 				answer += f"│ㅤ └ {profile_text['none'].capitalize()}\n"
@@ -270,14 +287,28 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 				tokens_balances = network_balances['tokens_balances']
 				for y, token_name in enumerate(tokens_balances):
 					if y+1 == len(network_balances['tokens_balances']):
-						answer += f"│ㅤ └ {token_name} - {profile_text['balance']}: {tokens_balances[token_name]}\n"
+						answer += f"│ㅤ └ {token_name} - {profile_text['balance'].capitalize()}: {tokens_balances[token_name]}\n"
 					else:
-						answer += f"│ㅤ ├ {token_name} - {profile_text['balance']}: {tokens_balances[token_name]}\n"
+						answer += f"│ㅤ ├ {token_name} - {profile_text['balance'].capitalize()}: {tokens_balances[token_name]}\n"
+
+					usd_balance += GetNetworkCoinPrice(token_name)*tokens_balances[token_name]
+
 		if x+1<len(user_balances):
 			answer += "│\n"
 
 	chat_id = bot_message.chat.id
 	message_id = bot_message.message_id
+
+	user_currency = user_info['main_currency']
+
+	if user_currency == 'usd':
+		balance = round(usd_balance, 2)
+		answer = answer.replace('{balance_in_currency}', str(balance))
+		answer = answer.replace('{currency}', CurrecnyEmoji('USD'))
+	elif user_currency == 'rub':
+		balance = round(usd_balance*GetUSDPrice(), 2)
+		answer = answer.replace('{balance_in_currency}', str(balance))
+		answer = answer.replace('{currency}', CurrecnyEmoji('RUB'))
 
 	asyncio.run_coroutine_threadsafe(bot.edit_message_text(answer, chat_id, message_id), loop)
 
@@ -290,8 +321,8 @@ def CheckAndRegUserInDB(message, language):
 	if not(CheckDataFromDB(data)):
 		user_mnemonic = GenerateUserMnemonic(user_id)
 		DataBaseExecute(
-			'INSERT INTO users (tg_id, tg_username, wallet_mnemonic, language, reg_datetime, status_mes, last_use) VALUES (?, ?, ?, ?, ?, ?, ?)',  \
-			params=(user_id, user_name, user_mnemonic, language, DateTimeNow(), 'menu', DateTimeNow())
+			'INSERT INTO users (tg_id, tg_username, wallet_mnemonic, language, main_currency, reg_datetime, status_mes, last_use) VALUES (?, ?, ?, ?, ?, ?, ?)',  \
+			params=(user_id, user_name, user_mnemonic, language, 'usd', DateTimeNow(), 'menu', DateTimeNow())
 		)
 
 def GetUserStatus(user_id):
@@ -318,8 +349,9 @@ def GetUserInfo(user_id):
 		'wallet_mnemonic' : user_data[3],
 		'milling' : user_data[4],
 		'language' : user_data[5],
-		'reg_datetime' : user_data[6],
-		'last_use' : user_data[7]
+		'main_currency' : user_data[6],
+		'reg_datetime' : user_data[7],
+		'last_use' : user_data[8]
 	}
 
 	return json_user_info
@@ -430,4 +462,3 @@ async def process_messages(message: types.Message):
 
 if __name__ == '__main__':
 	executor.start_polling(dp, on_startup=on_startup())
-	shutdown_bot()
