@@ -1,18 +1,87 @@
 {
-	"russian" : {
+	"ru" : {
 		"lang_text" : "Русский 🇷🇺",
 		"morning_text" : "доброе утро",
 		"day_text" : "добрый день",
 		"evening_text" : "добрый вечер",
 		"night_text" : "доброй ночи",
-		"start_message" : "<b>{start_time_message}</b>, тут вы можете обменивать, хранить, получить и отправить криптовалюту.\nПрисоединяйтесь к нашему каналу, чтобы быть всегда в курсе новостей на рынке и обновлений бота.\nОткрыто главное меню."
+
+		"menu_keyboard" : {
+			"get" : "Получить📥",
+			"profile" : "Профиль👤",
+			"send" : "Отправить📤",
+			"transaction_history" : "История транзакций🧾",
+			"api" : "API🔧",
+			"settings" : "Настройки⚙",
+			"reference" : "Справка📑"
+		},
+
+		"buy_keyboard" : {
+			"accept" : "Подтвердить✔️",
+			"cancel" : "Отмена❌"
+		},
+
+		"cancel_keyboard" : {
+			"cancel" : "Отмена❌"
+		},
+		
+		"start_text" : "<b>{start_time_message}</b>, тут вы можете обменивать, хранить, получить и отправить криптовалюту.\nПрисоединяйтесь к нашему каналу, чтобы быть всегда в курсе обновлений бота.\n\nОткрыто главное меню.",
+		"profile_text" : {
+			"loading" : "Загружаю информацию...",
+			"header" : "<b>Ваш профиль:</b>\nТелеграм ID: <code>{telegram_id}</code>\nОбщий баланс: {balance_in_currency}{currency}\nКол-во транзакций: {count_of_trnsactions}\nДата-регистрации: {registration_data}\n\n",
+			"wallet" : "кошелёк",
+			"networktype" : "тип сети",
+			"test" : "тестовая",
+			"main" : "основная",
+			"network" : "сеть",
+			"cryptocurrency" : "криптовалюта",
+			"token" : "токен",
+			"balance" : "баланс",
+			"none" : "пусто"
+		},
+		"help_text" : "none"
 	},
-	"english" : {
+
+	"en" : {
 		"lang_text" : "English 🇺🇸",
 		"morning_text" : "good morning",
 		"day_text" : "good afternoon",
 		"evening_text" : "good evening",
 		"night_text" : "good night",
-		"start_message" : "<b>{start_time_message}</b>, here you can exchange, store, receive and send cryptocurrency.\nJoin our channel to be always up to date with market news and bot updates.\nThe main menu is opened."
+
+		"menu_keyboard" : {
+			"get" : "Get📥",
+			"profile" : "Profile👤",
+			"send" : "Send📤",
+			"transaction_history" : "Transactions history🧾",
+			"api" : "API🔧",
+			"settings" : "Settings⚙",
+			"reference" : "Reference📑"
+		},
+
+		"buy_keyboard" : {
+			"accept" : "Accept✔️",
+			"cancel" : "Cancel❌"
+		},
+
+		"cancel_keyboard" : {
+			"cancel" : "Cancel❌"
+		},
+
+		"start_text" : "<b>{start_time_message}</b>, here you can exchange, store, receive and send cryptocurrency.\nJoin our channel to be always up to date with bot updates.\n\nThe main menu is opened.",
+		"profile_text" : {
+			"loading" : "Uploading information...",
+			"header" : "<b>Your profile:</b>\nTelegram ID: <code>{telegram_id}</code>\nTotal balance: {balance_in_currency}{currency}\nCount of transactions: {count_of_trnsactions}\nDate of registration: {registration_data}\n\n",
+			"wallet" : "wallet",
+			"networktype" : "network type",
+			"test" : "test",
+			"main" : "main",
+			"network" : "network",
+			"cryptocurrency" : "cryptocurrency",
+			"token" : "token",
+			"balance" : "balance",
+			"none" : "empty"
+		},
+		"help_text" : "none"
 	}
 }
