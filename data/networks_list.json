@@ -5,10 +5,10 @@
 		"chain_id" : 1,
 		"main_coin_img" : "./images/eth.png",
 		"rpc_url" : "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-		"scan_url" : "https://etherscan.io/",
+		"scan_url" : "https://goerli.etherscan.io",
 		"erc20tokens" : [
 			{
-				"token" : "FAU",
+				"token" : "USDT",
 				"token_img" : "./images/usdc.png",
 				"token_contract" : "0xBA62BCfcAaFc6622853cca2BE6Ac7d845BC0f2Dc"
 			}
@@ -21,7 +21,7 @@
 		"chain_id" : 1,
 		"main_coin_img" : "./images/eth.png",
 		"rpc_url" : "https://eth-mainnet.g.alchemy.com/v2/RTS_6mSCudWUgU-vNHcXhMpeYxwONoiv",
-		"scan_url" : "https://etherscan.io/",
+		"scan_url" : "https://etherscan.io",
 		"erc20tokens" : [
 			{
 				"token" : "USDT",
@@ -37,7 +37,7 @@
 		"chain_id" : 137,
 		"main_coin_img" : "./images/matic.png",
 		"rpc_url" : "https://polygon-mainnet.g.alchemy.com/v2/gL7IMpfKqk7D-ts6IL0XqBnRYImwM40m",
-		"scan_url" : "https://polygonscan.com/",
+		"scan_url" : "https://polygonscan.com",
 		"erc20tokens" : [
 			{
 				"token" : "USDT",

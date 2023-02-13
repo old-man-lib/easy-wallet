@@ -24,21 +24,34 @@
 		"cancel_keyboard" : {
 			"cancel" : "Отмена❌"
 		},
+
+		"qr_code_keyboard" : {
+			"show_qr_code" : "Показать QR Code"
+		},
 		
 		"start_text" : "<b>{start_time_message}</b>, тут вы можете обменивать, хранить, получить и отправить криптовалюту.\nПрисоединяйтесь к нашему каналу, чтобы быть всегда в курсе обновлений бота.\n\nОткрыто главное меню.",
 		"profile_text" : {
-			"loading" : "Загружаю информацию...",
-			"header" : "<b>Ваш профиль:</b>\nТелеграм ID: <code>{telegram_id}</code>\nОбщий баланс: {balance_in_currency}{currency}\nКол-во транзакций: {count_of_trnsactions}\nДата-регистрации: {registration_data}\n\n",
+			"generation_qr_code" : "Генерирую QR Code...",
+			"get_crypto_header" : "〰️Получить криптовалюту〰️\n\n",
+			"available_networks_tokens" : "Доступные сети и токены",
+			"use_address_for_transaction" : "Используйте адрес ниже для перевода криптовалюты на кошелек Eazy Wallet.\n\n",
+			"transaction_time_text" : "Средства будут зачислены в течение 2 минут",
+
+			"loading" : "Получаю информацию...",
+			"header" : "<b>💰Ваш профиль:</b>\nТелеграм ID: <code>{telegram_id}</code>\nОбщий баланс: {balance_in_currency}{currency}\nКол-во транзакций: {count_of_trnsactions}\nДата-регистрации: {registration_data}\n\n",
 			"wallet" : "кошелёк",
 			"networktype" : "тип сети",
 			"test" : "тестовая",
 			"main" : "основная",
 			"network" : "сеть",
 			"cryptocurrency" : "криптовалюта",
+			"blockchain_explorer" : "блокчей обозреватель",
+			"open_url" : "открыть в браузере",
 			"token" : "токен",
 			"balance" : "баланс",
 			"none" : "пусто"
 		},
+
 		"help_text" : "none"
 	},
 
@@ -68,20 +81,33 @@
 			"cancel" : "Cancel❌"
 		},
 
+		"qr_code_keyboard" : {
+			"show_qr_code" : "Show QR Code"
+		},
+
 		"start_text" : "<b>{start_time_message}</b>, here you can exchange, store, receive and send cryptocurrency.\nJoin our channel to be always up to date with bot updates.\n\nThe main menu is opened.",
 		"profile_text" : {
-			"loading" : "Uploading information...",
-			"header" : "<b>Your profile:</b>\nTelegram ID: <code>{telegram_id}</code>\nTotal balance: {balance_in_currency}{currency}\nCount of transactions: {count_of_trnsactions}\nDate of registration: {registration_data}\n\n",
+			"generation_qr_code" : "Generation QR Code...",
+			"get_crypto_header" : "〰️Get cryptocurrency〰️\n\n",
+			"available_networks_tokens" : "Available networks and tokens",
+			"use_address_for_transaction" : "Use the address below to transfer your cryptocurrency to Easy Wallet.\n\n",
+			"transaction_time_text" : "The funds will be credited within 2 minutes",
+
+			"loading" : "Getting information...",
+			"header" : "<b>💰Your profile:</b>\nTelegram ID: <code>{telegram_id}</code>\nTotal balance: {balance_in_currency}{currency}\nCount of transactions: {count_of_trnsactions}\nDate of registration: {registration_data}\n\n",
 			"wallet" : "wallet",
 			"networktype" : "network type",
 			"test" : "test",
 			"main" : "main",
 			"network" : "network",
 			"cryptocurrency" : "cryptocurrency",
+			"blockchain_explorer" : "blockchain explorer",
+			"open_url" : "open in browser",
 			"token" : "token",
 			"balance" : "balance",
 			"none" : "empty"
 		},
+		
 		"help_text" : "none"
 	}
 }
