@@ -1,4 +1,5 @@
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types.web_app_info import WebAppInfo
 
 import config, json
 
@@ -65,3 +66,13 @@ def GetCancelKeyboard(language):
 	)
 
 	return cancel
+
+def GetQRCodeInlineKeyboard(language):
+	qr_code_keyboard_text = GetTextByTagAndLanguage(language_json, language, 'qr_code_keyboard')
+
+	qr_code = InlineKeyboardMarkup()
+	qr_code.row(
+		InlineKeyboardButton(text=qr_code_keyboard_text['show_qr_code'], web_app=WebAppInfo(url='https://192.168.1.2:5000/qr'))
+	)
+
+	return qr_code

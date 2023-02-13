@@ -1,9 +1,9 @@
 import keyboards, config, networks_imports
-import json, requests, asyncio, threading, orjson
 
 from random import randint
 from threading import Thread
 from datetime import datetime
+import json, requests, asyncio, threading, orjson
 
 # -------------------- Parametrs -------------------- #
 BOT_TOKEN = config.token # Telegram Bot Token
@@ -11,6 +11,7 @@ BOT_VERSION = config.bot_version # Telegram Bot Version
 DEFAULT_LANGUAGE = config.default_language # Bot Default Language
 
 DB_HOST = config.db_host # DataBase Host IP
+DB_PORT = config.db_port # DataBase Host Port Number
 DB_USER = config.db_user # DataBase User
 DB_PASSWORD = config.db_password # DataBase User Password
 DATABASE_NAME = config.database_name # DataBase Name
@@ -21,7 +22,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -30,10 +31,11 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 import pymysql.cursors
 
 def CreateDB_Connection():
-	global DB_HOST, DB_USER, DB_PASSWORD, DATABASE_NAME
+	global DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DATABASE_NAME
 
 	connection = pymysql.connect(
 		host=DB_HOST,
+		port=DB_PORT,
 		user=DB_USER,
 		password=DB_PASSWORD,
 		database=DATABASE_NAME
@@ -91,7 +93,7 @@ def ImportUserWallet(user_id):
 
 	return wallet
 
-def UserTransactions(wallet_adress, network):
+def UserTransactions(wallet_adress, network): # <-  Make This Function For The End
 	pass
 
 def GetUserAddress(user_id):
@@ -159,7 +161,7 @@ def GetAllBalances(user_id):
 
 	return balances
 
-# --------------------- Work With Crypto --------------------- #
+# --------------------- Work With Crypto --------------------- # <- Rewrite Get All Crypto Curency Balance
 json_file = './data/coins_api_name.json'
 with open(json_file, "r", encoding='utf-8') as file:
 	coins_api_name = orjson.loads(file.read())
@@ -230,7 +232,7 @@ def DayTimeText() -> str:
 def on_startup() -> None:
 	print("Bot Started!")
 
-def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
+def SendUserProfileInfo(bot_message, loop, user_id, profile_text) -> None:
 	user_info = GetUserInfo(user_id)
 	user_balances = GetAllBalances(user_id)
 
@@ -250,7 +252,7 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 			network_type = network_balances['network_type']
 			main_coin = networks_json[network]['main_coin']
 			answer += f"└ {profile_text['network'].capitalize()}: {network.title()}\n"
-			answer += f"ㅤ├ {profile_text['networktype'].capitalize()} : {profile_text[network_type].capitalize()}\n"
+			answer += f"ㅤ├ {profile_text['networktype'].capitalize()}: {profile_text[network_type].capitalize()}\n"
 			answer += f"ㅤ├ {profile_text['cryptocurrency'].capitalize()}\n"
 			answer += f"ㅤ│ └ {main_coin} - {profile_text['balance'].capitalize()}: {network_balances[network]}\n"
 			answer += f"ㅤ└ {profile_text['token'].capitalize()}\n"
@@ -274,7 +276,7 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 			network_type = network_balances['network_type']
 			main_coin = networks_json[network]['main_coin']
 			answer += f"├ {profile_text['network'].capitalize()}: {network.title()}\n"
-			answer += f"│ ├ {profile_text['networktype'].capitalize()} : {profile_text[network_type].capitalize()}\n"
+			answer += f"│ ├ {profile_text['networktype'].capitalize()}: {profile_text[network_type].capitalize()}\n"
 			answer += f"│ ├ {profile_text['cryptocurrency'].capitalize()}\n"
 			answer += f"│ │ └ {main_coin} - {profile_text['balance'].capitalize()}: {network_balances[network]}\n"
 			answer += f"│ └ {profile_text['token'].capitalize()}\n"
@@ -312,8 +314,74 @@ def SendUserProfileInfo(bot_message, loop, user_id, profile_text):
 
 	asyncio.run_coroutine_threadsafe(bot.edit_message_text(answer, chat_id, message_id), loop)
 
+def SendUserCryptoQRCode(loop, user_id, profile_text) -> None:
+	address = GetUserAddress(user_id)
+	networks = GetListOfNetworks()
+
+	answer = f"<b>{profile_text['get_crypto_header']}</b>"
+
+	answer += f"┌ {profile_text['available_networks_tokens']}\n"
+	for x, network in enumerate(networks):
+		network_data = networks_json[network]
+
+		network_type = 'main'
+		if networks_json[network]['testnet']:
+			network_type = 'test'
+
+		main_coin = networks_json[network]['main_coin']
+		blockchain_explorer_user_wallet_url = networks_json[network]['scan_url']+"/address/"+address
+
+		if x+1 == len(networks):
+			answer += f"└ {profile_text['network'].capitalize()}: {network.title()}\n"
+			answer += f"ㅤ├ {profile_text['networktype'].capitalize()}: {profile_text[network_type].capitalize()}\n"
+			answer += f"ㅤ├ {profile_text['blockchain_explorer'].capitalize()}: <a href='{blockchain_explorer_user_wallet_url}'>{profile_text['open_url']}</a>\n"
+			answer += f"ㅤ├ {profile_text['cryptocurrency'].capitalize()}\n"
+			answer += f"ㅤ│ └ {main_coin}\n"
+			answer += f"ㅤ└ {profile_text['token'].capitalize()}\n"
+
+			erc20tokens = networks_json[network]['erc20tokens']
+			
+			if len(erc20tokens) == 0:
+				answer += f"ㅤㅤ └ {profile_text['none'].capitalize()}\n"
+			else:
+				for y, erc20_token in enumerate(erc20tokens):
+					if y+1 == len(erc20tokens):
+						answer += f"ㅤㅤ└ {erc20_token['token']}\n"
+					else:
+						answer += f"ㅤㅤ├ {erc20_token['token']}\n"
+		
+		else:
+			answer += f"├ {profile_text['network'].capitalize()}: {network.title()}\n"
+			answer += f"│ ├ {profile_text['networktype'].capitalize()}: {profile_text[network_type].capitalize()}\n"
+			answer += f"│ ├ {profile_text['blockchain_explorer'].capitalize()}: <a href='{blockchain_explorer_user_wallet_url}'>{profile_text['open_url']}</a>\n"
+			answer += f"│ ├ {profile_text['cryptocurrency'].capitalize()}\n"
+			answer += f"│ │ └ {main_coin}\n"
+			answer += f"│ └ {profile_text['token'].capitalize()}\n"
+			
+			erc20tokens = networks_json[network]['erc20tokens']
+
+			if len(erc20tokens) == 0:
+				answer += f"│ㅤ └ {profile_text['none'].capitalize()}\n"
+			else:
+				for y, erc20_token in enumerate(erc20tokens):
+					if y+1 == len(erc20tokens):
+						answer += f"│ㅤ └ {erc20_token['token']}\n"
+					else:
+						answer += f"│ㅤ ├ {erc20_token['token']}\n"
+
+		if x+1<len(networks):
+			answer += "│\n"
+
+	answer += "\n"+profile_text['use_address_for_transaction']
+	answer += f"<code>{address}</code>\n\n"
+	answer += profile_text['transaction_time_text']
+	
+	user_language = GetUserLanguage(user_id)
+
+	asyncio.run_coroutine_threadsafe(bot.send_message(user_id, answer, disable_web_page_preview=True, reply_markup=keyboards.GetQRCodeInlineKeyboard(user_language)), loop)
+
 # --------------------- Work With Databse --------------------- #
-def CheckAndRegUserInDB(message, language):
+def CheckAndRegUserInDB(message, language) -> None:
 	user_id = message.from_user.id
 	user_name = message.from_user.username
 
@@ -325,21 +393,21 @@ def CheckAndRegUserInDB(message, language):
 			params=(user_id, user_name, user_mnemonic, language, 'usd', DateTimeNow(), 'menu', DateTimeNow())
 		)
 
-def GetUserStatus(user_id):
+def GetUserStatus(user_id) -> None:
 	user_data = DataBaseExecute('SELECT status_mes FROM users WHERE tg_id = ?', (user_id))[0]
 
 	return user_data[0]
 
-def GetUserLanguage(user_id):
+def GetUserLanguage(user_id) -> None:
 	user_data = DataBaseExecute('SELECT language FROM users WHERE tg_id = ?', (user_id))[0]
 	return user_data[0]
 
-def GetUserMnemonic(user_id):
+def GetUserMnemonic(user_id) -> None:
 	user_data = DataBaseExecute('SELECT wallet_mnemonic FROM users WHERE tg_id = ?', (user_id))[0]
 
 	return user_data[0]
 
-def GetUserInfo(user_id):
+def GetUserInfo(user_id) -> None:
 	user_data = DataBaseExecute('SELECT * FROM users WHERE tg_id = ?', (user_id))[0]
 
 	json_user_info = {
@@ -356,25 +424,25 @@ def GetUserInfo(user_id):
 
 	return json_user_info
 
-def ChangeUserStatus(user_id, status_mes):
+def ChangeUserStatus(user_id, status_mes) -> None:
 	DataBaseExecute(
 		'UPDATE users SET status_mes = ? WHERE tg_id = ?',
 		(status_mes, user_id)
 	)
 
-def ChangeUserSettings(user_id, milling, language):
+def ChangeUserSettings(user_id, milling, language) -> None:
 	DataBaseExecute(
 		'UPDATE users SET milling = ?, language = ? WHERE tg_id = ?',
 		(milling, language, user_id)
 	)
 
-def CheckDataFromDB(data):
+def CheckDataFromDB(data) -> None:
 	if data:
 		return True
 	else:
 		return False
 
-def UpdateLastUse(user_id): # <- Rewrite Functions For DataBase
+def UpdateLastUse(user_id) -> None:
 	DataBaseExecute(
 		'UPDATE users SET last_use = ? WHERE tg_id = ?',
 		(DateTimeNow(), user_id)
@@ -431,10 +499,10 @@ async def process_messages(message: types.Message):
 	user_language = GetUserLanguage(user_id)
 	user_status = GetUserStatus(user_id).split('_')
 
+	profile_text = GetTextByTagAndLanguage(language_json, user_language, 'profile_text')
+
 	if user_status[0] == 'menu':
 		if message.text in ['Профиль👤', 'Profile👤']:
-			profile_text = GetTextByTagAndLanguage(language_json, user_language, 'profile_text')
-			
 			answer = profile_text['loading']
 			bot_message = await bot.send_message(message.from_user.id, answer)
 
@@ -443,7 +511,9 @@ async def process_messages(message: types.Message):
 			thread.start()
 
 		if message.text in ['Получить📥', 'Get📥']:
-			await bot.send_message(message.from_user.id, WorkInProgress())
+			loop = asyncio.get_event_loop()
+			thread = Thread(target=SendUserCryptoQRCode, args=(loop, user_id, profile_text, ))
+			thread.start()
 
 		if message.text in ['Отправить📤', 'Send📤']:
 			await bot.send_message(message.from_user.id, WorkInProgress())
