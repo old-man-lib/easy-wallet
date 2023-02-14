@@ -67,12 +67,12 @@ def GetCancelKeyboard(language):
 
 	return cancel
 
-def GetQRCodeInlineKeyboard(language):
+def GetQRCodeInlineKeyboard(language, address):
 	qr_code_keyboard_text = GetTextByTagAndLanguage(language_json, language, 'qr_code_keyboard')
 
 	qr_code = InlineKeyboardMarkup()
 	qr_code.row(
-		InlineKeyboardButton(text=qr_code_keyboard_text['show_qr_code'], web_app=WebAppInfo(url='https://192.168.1.2:5000/qr'))
+		InlineKeyboardButton(text=qr_code_keyboard_text['show_qr_code'], web_app=WebAppInfo(url=f'https://c0d2-91-77-167-57.ngrok.io/?wallet_adress={address}'))
 	)
 
 	return qr_code

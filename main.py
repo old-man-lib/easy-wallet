@@ -378,7 +378,7 @@ def SendUserCryptoQRCode(loop, user_id, profile_text) -> None:
 	
 	user_language = GetUserLanguage(user_id)
 
-	asyncio.run_coroutine_threadsafe(bot.send_message(user_id, answer, disable_web_page_preview=True, reply_markup=keyboards.GetQRCodeInlineKeyboard(user_language)), loop)
+	asyncio.run_coroutine_threadsafe(bot.send_message(user_id, answer, disable_web_page_preview=True, reply_markup=keyboards.GetQRCodeInlineKeyboard(user_language, address)), loop)
 
 # --------------------- Work With Databse --------------------- #
 def CheckAndRegUserInDB(message, language) -> None:
@@ -389,7 +389,7 @@ def CheckAndRegUserInDB(message, language) -> None:
 	if not(CheckDataFromDB(data)):
 		user_mnemonic = GenerateUserMnemonic(user_id)
 		DataBaseExecute(
-			'INSERT INTO users (tg_id, tg_username, wallet_mnemonic, language, main_currency, reg_datetime, status_mes, last_use) VALUES (?, ?, ?, ?, ?, ?, ?)',  \
+			'INSERT INTO users (tg_id, tg_username, wallet_mnemonic, language, main_currency, reg_datetime, status_mes, last_use) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',  \
 			params=(user_id, user_name, user_mnemonic, language, 'usd', DateTimeNow(), 'menu', DateTimeNow())
 		)
 
