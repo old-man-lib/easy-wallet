@@ -1,0 +1,48 @@
+@font-face {
+	font-family: "PixelStyle";
+	src: local("PixelStyle"),
+	url("./fonts/pixel.ttf") format("truetype");
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	background-color: var(--tg-theme-bg-color);
+	color: var(--tg-theme-text-color);
+}
+
+.container {
+	margin-top: 5vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 50vh;
+}
+
+.block {
+	text-align: center;
+	justify-content: center;
+	margin-bottom: 25px;
+}
+
+#top-text {
+	font-family: 'PixelStyle';
+}
+
+.qr-code-svg {
+	border-radius: 10px;
+}
+
+.qr-code-svg.path {
+	fill: var(--tg-theme-text-color);
+}
+
+
+.main {
+	margin-top: 4.2vh;
+}
