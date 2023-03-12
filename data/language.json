@@ -16,6 +16,15 @@
 			"reference" : "Справка📑"
 		},
 
+		"settings_keyboard" : {
+			"change_language" : "📑Сменить язык",
+			"mailing_on" : "✔️Включить рассылку",
+			"mailing_off" : "❌Выключить рассылку",
+			"back" : "↩️Назад",
+
+			"change_language" : "Выберите язык для работы бота."
+		},
+
 		"buy_keyboard" : {
 			"accept" : "Подтвердить✔️",
 			"cancel" : "Отмена❌"
@@ -28,8 +37,12 @@
 		"qr_code_keyboard" : {
 			"show_qr_code" : "Показать QR Code"
 		},
+
+		"back_text" : {
+			"back_to_menu" : "Меню открыто"
+		},
 		
-		"start_text" : "<b>{start_time_message}</b>, тут вы можете обменивать, хранить, получить и отправить криптовалюту.\nПрисоединяйтесь к нашему каналу, чтобы быть всегда в курсе обновлений бота.\n\nОткрыто главное меню.",
+		"start_text" : "<b>{start_time_message}</b>, тут вы можете обменивать, хранить, получать и отправлять криптовалюту.\nПрисоединяйтесь к нашему каналу, чтобы быть всегда в курсе обновлений бота.\n\nОткрыто главное меню.",
 		"profile_text" : {
 			"generation_qr_code" : "Генерирую QR Code...",
 			"get_crypto_header" : "〰️Получить криптовалюту〰️\n\n",
@@ -45,11 +58,20 @@
 			"main" : "основная",
 			"network" : "сеть",
 			"cryptocurrency" : "криптовалюта",
-			"blockchain_explorer" : "блокчей обозреватель",
+			"blockchain_explorer" : "блокчейн обозреватель",
 			"open_url" : "открыть в браузере",
 			"token" : "токен",
 			"balance" : "баланс",
 			"none" : "пусто"
+		},
+
+		"send_text" : {
+		},
+
+		"settings_text" : {
+			"text" : "<b>⚙️Настройки:</b>\n\nРассылка новостей: {mailing_status}\nЯзык бота: {bot_language}\nВерсия бота: {bot_version}\n\nРазработкчик: {developer_tg}",
+			"mailing_on" : "Вкл.",
+			"mailing_off" : "Выкл."
 		},
 
 		"help_text" : "none"
@@ -72,6 +94,15 @@
 			"reference" : "Reference📑"
 		},
 
+		"settings_keyboard" : {
+			"change_language" : "📑Change language",
+			"mailing_on" : "✔️Turn mailing on",
+			"mailing_off" : "❌Turn mailing off",
+			"back" : "↩️Back",
+
+			"change_language" : "Select the language for the bot to work."
+		},
+
 		"buy_keyboard" : {
 			"accept" : "Accept✔️",
 			"cancel" : "Cancel❌"
@@ -83,6 +114,10 @@
 
 		"qr_code_keyboard" : {
 			"show_qr_code" : "Show QR Code"
+		},
+
+		"back_text" : {
+			"back_to_menu" : "Menu open"
 		},
 
 		"start_text" : "<b>{start_time_message}</b>, here you can exchange, store, receive and send cryptocurrency.\nJoin our channel to be always up to date with bot updates.\n\nThe main menu is opened.",
@@ -106,6 +141,16 @@
 			"token" : "token",
 			"balance" : "balance",
 			"none" : "empty"
+		},
+
+		"send_text" : {
+		},
+
+		"settings_text" : {
+			"text" : "<b>⚙️Settings:</b>\n\nMailing status: {mailing_status}\nLanguage Bot: {bot_language}\nBot Version: {bot_version}\n\nDeveloper: {developer_tg}",
+			"mailing_on" : "On",
+			"mailing_off" : "Off"
+
 		},
 		
 		"help_text" : "none"
