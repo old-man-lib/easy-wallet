@@ -8,6 +8,7 @@ import json, requests, asyncio, threading, orjson
 # -------------------- Parametrs -------------------- #
 BOT_TOKEN = config.token # Telegram Bot Token
 BOT_VERSION = config.bot_version # Telegram Bot Version
+DEVELOPER_TG = config.developer_tg # Developer TG
 DEFAULT_LANGUAGE = config.default_language # Bot Default Language
 
 DB_HOST = config.db_host # DataBase Host IP
@@ -86,8 +87,8 @@ def GenerateUserMnemonic(user_id) -> str:
 
 	return user_wallet.ToDict()['mnemonic']
 
-def ImportUserWallet(user_id):
-	wallet_fact = CrateWalletFactory()
+def ImportUserWallet(user_id, network='ethereum'):
+	wallet_fact = CrateWalletFactory(network)
 	mnemonic = GetUserMnemonic(user_id)
 	wallet = wallet_fact.CreateFromMnemonic(str(user_id), mnemonic)
 
@@ -96,11 +97,18 @@ def ImportUserWallet(user_id):
 def UserTransactions(wallet_adress, network): # <-  Make This Function For The End
 	pass
 
+def GetUserWalletKeys(user_id, network='ethereum'):
+	wallet = ImportUserWallet(user_id, network)
+	wallet.Generate(acc_idx=0, change_idx=HdWalletBipChanges.CHAIN_EXT, addr_num=1, addr_off=0)
+	wallets_data = wallet.GetData(HdWalletBipDataTypes.ADDRESS)
+	wallet_data = wallets_data[0].ToDict()
+
+	return wallet_data
+
 def GetUserAddress(user_id):
 	wallet = ImportUserWallet(user_id)
 	wallet.Generate(acc_idx=0, change_idx=HdWalletBipChanges.CHAIN_EXT, addr_num=1, addr_off=0)
 	addresses = wallet.GetData(HdWalletBipDataTypes.ADDRESS)
-
 	address = addresses[0].ToDict()['address']
 
 	return address
@@ -202,6 +210,16 @@ def GetLanguageList() -> list:
 	languages = []
 	for language in language_json:
 		languages.append(language)
+
+	return languages
+
+def GetLanguageNameList() -> list:
+	languages_list = GetLanguageList()
+
+	languages = {}
+
+	for language_tag in languages_list:
+		languages.update({language_json[language_tag]['lang_text'] : language_tag})
 
 	return languages
 
@@ -380,6 +398,24 @@ def SendUserCryptoQRCode(loop, user_id, profile_text) -> None:
 
 	asyncio.run_coroutine_threadsafe(bot.send_message(user_id, answer, disable_web_page_preview=True, reply_markup=keyboards.GetQRCodeInlineKeyboard(user_language, address)), loop)
 
+def SettingsText(user_info, user_language) -> str:
+	settings_text = GetTextByTagAndLanguage(language_json, user_language, 'settings_text')
+
+	answer = settings_text['text']
+
+	mailing_status = ''
+	if user_info['mailing'] == 1:
+		mailing_status = settings_text['mailing_on']
+	else:
+		mailing_status = settings_text['mailing_off']
+	answer = answer.replace('{mailing_status}', mailing_status)
+
+	answer = answer.replace('{bot_language}', language_json[user_language]['lang_text'])
+	answer = answer.replace('{bot_version}', BOT_VERSION)
+	answer = answer.replace('{developer_tg}', DEVELOPER_TG)
+
+	return answer
+
 # --------------------- Work With Databse --------------------- #
 def CheckAndRegUserInDB(message, language) -> None:
 	user_id = message.from_user.id
@@ -393,21 +429,28 @@ def CheckAndRegUserInDB(message, language) -> None:
 			params=(user_id, user_name, user_mnemonic, language, 'usd', DateTimeNow(), 'menu', DateTimeNow())
 		)
 
-def GetUserStatus(user_id) -> None:
+def CheckUserInDB(user_id):
+	data = DataBaseExecute('SELECT * FROM users WHERE tg_id = ?', (user_id))
+	if CheckDataFromDB(data):
+		return True
+	else:
+		return False
+
+def GetUserStatus(user_id) -> str:
 	user_data = DataBaseExecute('SELECT status_mes FROM users WHERE tg_id = ?', (user_id))[0]
 
 	return user_data[0]
 
-def GetUserLanguage(user_id) -> None:
+def GetUserLanguage(user_id) -> str:
 	user_data = DataBaseExecute('SELECT language FROM users WHERE tg_id = ?', (user_id))[0]
 	return user_data[0]
 
-def GetUserMnemonic(user_id) -> None:
+def GetUserMnemonic(user_id) -> str:
 	user_data = DataBaseExecute('SELECT wallet_mnemonic FROM users WHERE tg_id = ?', (user_id))[0]
 
 	return user_data[0]
 
-def GetUserInfo(user_id) -> None:
+def GetUserInfo(user_id) -> list:
 	user_data = DataBaseExecute('SELECT * FROM users WHERE tg_id = ?', (user_id))[0]
 
 	json_user_info = {
@@ -415,7 +458,7 @@ def GetUserInfo(user_id) -> None:
 		'tg_id' : user_data[1],
 		'tg_username' : user_data[2],
 		'wallet_mnemonic' : user_data[3],
-		'milling' : user_data[4],
+		'mailing' : user_data[4],
 		'language' : user_data[5],
 		'main_currency' : user_data[6],
 		'reg_datetime' : user_data[7],
@@ -430,10 +473,16 @@ def ChangeUserStatus(user_id, status_mes) -> None:
 		(status_mes, user_id)
 	)
 
-def ChangeUserSettings(user_id, milling, language) -> None:
+def ChangeUserMailling(user_id, mailing) -> None:
 	DataBaseExecute(
-		'UPDATE users SET milling = ?, language = ? WHERE tg_id = ?',
-		(milling, language, user_id)
+		'UPDATE users SET mailing = ? WHERE tg_id = ?',
+		(mailing, user_id)
+	)
+
+def ChangeUserLanguage(user_id, new_language) -> None:
+	DataBaseExecute(
+		'UPDATE users SET language = ? WHERE tg_id = ?',
+		(new_language, user_id)
 	)
 
 def CheckDataFromDB(data) -> None:
@@ -460,12 +509,15 @@ async def process_start_command(message: types.Message):
 
 	user_language = ""
 
-	if user_tg_language in languages:
-		CheckAndRegUserInDB(message, user_tg_language)
-		user_language = user_tg_language
+	if CheckUserInDB(user_id):
+		user_language = GetUserLanguage(user_id)
 	else:
-		CheckAndRegUserInDB(message, DEFAULT_LANGUAGE)
-		user_language = DEFAULT_LANGUAGE
+		if user_tg_language in languages:
+			CheckAndRegUserInDB(message, user_tg_language)
+			user_language = user_tg_language
+		else:
+			CheckAndRegUserInDB(message, DEFAULT_LANGUAGE)
+			user_language = DEFAULT_LANGUAGE
 
 	time_text = GetTextByTagAndLanguage(language_json, user_language, start_time_message_text+'_text')
 	time_text = time_text.capitalize()
@@ -486,10 +538,6 @@ async def process_update_command(message: types.Message):
 
 	await bot.send_message(message.from_user.id, "Ok", reply_markup=keyboards.GetMenuKeyboard(user_language))
 
-@dp.message_handler(commands=['test'])
-async def process_help_command(message: types.Message):
-	user_id = message.from_user.id
-
 @dp.message_handler()
 async def process_messages(message: types.Message):
 	user_id = message.from_user.id
@@ -499,10 +547,10 @@ async def process_messages(message: types.Message):
 	user_language = GetUserLanguage(user_id)
 	user_status = GetUserStatus(user_id).split('_')
 
-	profile_text = GetTextByTagAndLanguage(language_json, user_language, 'profile_text')
-
 	if user_status[0] == 'menu':
 		if message.text in ['Профиль👤', 'Profile👤']:
+			profile_text = GetTextByTagAndLanguage(language_json, user_language, 'profile_text')
+
 			answer = profile_text['loading']
 			bot_message = await bot.send_message(message.from_user.id, answer)
 
@@ -511,11 +559,15 @@ async def process_messages(message: types.Message):
 			thread.start()
 
 		if message.text in ['Получить📥', 'Get📥']:
+			profile_text = GetTextByTagAndLanguage(language_json, user_language, 'profile_text')
+
 			loop = asyncio.get_event_loop()
 			thread = Thread(target=SendUserCryptoQRCode, args=(loop, user_id, profile_text, ))
 			thread.start()
 
 		if message.text in ['Отправить📤', 'Send📤']:
+			#wallet_data = GetUserWalletKeys(user_id, network='polygon')
+
 			await bot.send_message(message.from_user.id, WorkInProgress())
 
 		if message.text in ['История транзакций🧾', 'Transactions history🧾']:
@@ -525,10 +577,84 @@ async def process_messages(message: types.Message):
 			await bot.send_message(message.from_user.id, WorkInProgress())
 
 		if message.text in ['Настройки⚙', 'Settings⚙']:
-			await bot.send_message(message.from_user.id, WorkInProgress())
+			ChangeUserStatus(user_id, 'settings')
+
+			user_info = GetUserInfo(user_id)
+			answer = SettingsText(user_info, user_language)
+			await bot.send_message(message.from_user.id, answer, reply_markup=keyboards.GetSettingsKeyboard(user_language, user_info['mailing']))
 
 		if message.text in ['Справка📑', 'Reference📑']:
 			await bot.send_message(message.from_user.id, WorkInProgress())
 
+	if user_status[0] == 'settings':
+		if message.text in ['↩️Назад', '↩️Back']:
+			ChangeUserStatus(user_id, 'menu')
+
+			back_text = GetTextByTagAndLanguage(language_json, user_language, 'back_text')
+
+			await bot.send_message(message.from_user.id, back_text['back_to_menu'], reply_markup=keyboards.GetMenuKeyboard(user_language))
+
+		if message.text in ['📑Сменить язык', '📑Change language']:
+			ChangeUserStatus(user_id, 'change_language')
+
+			change_language_text = GetTextByTagAndLanguage(language_json, user_language, 'settings_text')
+
+			await bot.send_message(message.from_user.id, change_language_text['select_language'], reply_markup=keyboards.GetLanguagesKeyboard(user_language))
+
+		if message.text in ['✔️Включить рассылку', '✔️Turn mailing on']:
+			ChangeUserMailling(user_id, 1)
+
+			settings_text = GetTextByTagAndLanguage(language_json, user_language, 'settings_text')
+
+			await bot.send_message(message.from_user.id, settings_text['mailing_now_on'])
+
+			user_info = GetUserInfo(user_id)
+			answer = SettingsText(user_info, user_language)
+
+			await bot.send_message(message.from_user.id, answer, reply_markup=keyboards.GetSettingsKeyboard(user_language, user_info['mailing']))
+
+		if message.text in ['❌Выключить рассылку', '❌Turn mailing off']:
+			ChangeUserMailling(user_id, 0)
+
+			settings_text = GetTextByTagAndLanguage(language_json, user_language, 'settings_text')
+
+			await bot.send_message(message.from_user.id, settings_text['mailing_now_off'])
+
+			user_info = GetUserInfo(user_id)
+			answer = SettingsText(user_info, user_language)
+
+			await bot.send_message(message.from_user.id, answer, reply_markup=keyboards.GetSettingsKeyboard(user_language, user_info['mailing']))
+
+	if user_status[0] == 'change':
+		if user_status[1] == 'language':
+			if message.text in ['↩️Назад', '↩️Back']:
+				ChangeUserStatus(user_id, 'settings')
+
+				user_info = GetUserInfo(user_id)
+				answer = SettingsText(user_info, user_language)
+
+				await bot.send_message(message.from_user.id, answer, reply_markup=keyboards.GetSettingsKeyboard(user_language, user_info['mailing']))
+			else:
+				new_language = message.text
+				
+				languages = GetLanguageNameList()
+				if new_language in languages:
+					new_language_tag = languages[new_language]
+					ChangeUserStatus(user_id, 'settings')
+					ChangeUserLanguage(user_id, new_language_tag)
+
+					settings_text = GetTextByTagAndLanguage(language_json, new_language_tag, 'settings_text')
+
+					await bot.send_message(message.from_user.id, settings_text['language_changed'])
+
+					user_info = GetUserInfo(user_id)
+					answer = SettingsText(user_info, new_language_tag)
+
+					await bot.send_message(message.from_user.id, answer, reply_markup=keyboards.GetSettingsKeyboard(new_language_tag, user_info['mailing']))
+				else:
+					error_text = GetTextByTagAndLanguage(language_json, user_language, 'error_text')
+
+					await bot.send_message(message.from_user.id, error_text['language_not_found'])
+
 if __name__ == '__main__':
-	executor.start_polling(dp, on_startup=on_startup())
+	executor.start_polling(dp, on_startup=on_startup(), skip_updates=True)
