@@ -1,9 +1,13 @@
-token = '' # Telegram Bot Token
+token = ''
 
-db_host = '' # DataBase Host IP
-db_user = '' # DataBase User Name
-db_password = '' # DataBase User Password
-database_name = '' # DataBase Name
+web_url = ''
 
-default_language = 'en' # Bot Default Language
-bot_version = '1.0.0-beta' # Bot Version
+db_host = ''
+db_port =  3306
+db_user = ''
+db_password = ''
+database_name = ''
+
+default_language = 'en'
+bot_version = '1.0.0-beta'
+developer_tg = '@kisa_man'

@@ -45,6 +45,44 @@ def GetMenuKeyboard(language):
 
 	return menu
 
+def GetSettingsKeyboard(language, mailing):
+	settings_keyboard_text = GetTextByTagAndLanguage(language_json, language, 'settings_keyboard')
+
+	if mailing == 1:
+		mailing_button = KeyboardButton(settings_keyboard_text['mailing_off'])
+	else:
+		mailing_button = KeyboardButton(settings_keyboard_text['mailing_on'])
+
+	setting = ReplyKeyboardMarkup(resize_keyboard=True)
+	setting.row(
+		KeyboardButton(settings_keyboard_text['change_language']),
+		mailing_button
+	)
+	setting.row(
+		KeyboardButton(settings_keyboard_text['back'])
+	)
+
+	return setting
+
+def GetLanguagesKeyboard(language):
+	settings_keyboard_text = GetTextByTagAndLanguage(language_json, language, 'settings_keyboard')
+
+	languages_list = GetLanguageList()
+	languages = ReplyKeyboardMarkup(resize_keyboard=True)
+
+	for language_tag in languages_list:
+			languages.row(
+				KeyboardButton(language_json[language_tag]['lang_text'])
+			)
+
+
+	languages.row(
+		KeyboardButton(settings_keyboard_text['back'])
+	)
+
+	return languages
+
+
 def GetBuyKeyboard(language):
 	buy_keyboard_text = GetTextByTagAndLanguage(language_json, language, 'buy_keyboard')
 	
@@ -72,7 +110,7 @@ def GetQRCodeInlineKeyboard(language, address):
 
 	qr_code = InlineKeyboardMarkup()
 	qr_code.row(
-		InlineKeyboardButton(text=qr_code_keyboard_text['show_qr_code'], web_app=WebAppInfo(url=f'https://c0d2-91-77-167-57.ngrok.io/?wallet_adress={address}'))
+		InlineKeyboardButton(text=qr_code_keyboard_text['show_qr_code'], web_app=WebAppInfo(url=f'{config.web_url}/?wallet_adress={address}'))
 	)
 
 	return qr_code
